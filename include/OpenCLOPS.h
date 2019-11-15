@@ -8,16 +8,14 @@
 #include <CL/cl.hpp>
 
 class OpenCLOPS {
-    std::vector<cl::Platform> platform;
-    std::vector<cl::Device> device;
     cl::Program program;
     cl::Context context;
     cl::CommandQueue queue;
 
 public:
     OpenCLOPS();
-    void print_gpu_device_info();
-    int get_double_precision_gpu_device();
+    void print_gpu_devices();
+    void print_platforms();
     std::vector<double> vec_add(std::vector<double>&,std::vector<double>&);
 };
 

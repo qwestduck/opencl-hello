@@ -25,46 +25,73 @@ static const char source[] =
     "}\n";
 
 OpenCLOPS::OpenCLOPS() {
+    // Find NVidia platform
+    std::vector<cl::Platform> platform;
+    cl::Platform nvp;
+    bool nvidia_platform_present = false;
+
+    cl::Platform::get(&platform);
+    for(auto p = platform.begin(); p != platform.end(); p++) {
+        if(p->getInfo<CL_PLATFORM_NAME>() == "NVIDIA CUDA") {
+            nvp = cl::Platform(*p);
+
+            nvidia_platform_present = true;
+            break;
+        }
+    }
+
+    if(!nvidia_platform_present) {
+        std::cerr << "No NVidia OpenCL platform found." << std::endl;
+    }
+
+    // Build a context of all double precision gpus from the nvidia platform
+    std::vector<cl::Device> nvp_gpus;
+    std::vector<cl::Device> nvp_double_gpus;
+    nvp.getDevices(CL_DEVICE_TYPE_GPU, &nvp_gpus);
+
+    for(auto d = nvp_gpus.begin(); d != nvp_gpus.end(); d++) {
+        if (!d->getInfo<CL_DEVICE_AVAILABLE>()) continue;
+
+        std::string ext = d->getInfo<CL_DEVICE_EXTENSIONS>();
+
+        if (
+            ext.find("cl_khr_fp64") == std::string::npos &&
+            ext.find("cl_amd_fp64") == std::string::npos
+        ) continue;
+
+        nvp_double_gpus.push_back(*d);
+    }
+
+    if (nvp_double_gpus.empty()) {
+        std::cerr << "Nvidia GPUs with double precision not found." << std::endl;
+    }
+
+    context = cl::Context(nvp_double_gpus);
+
+    // Create command queue.
+    queue = cl::CommandQueue(context, nvp_double_gpus[0]);
+
+    // Compile OpenCL program for found device.
+    program = cl::Program(context, cl::Program::Sources(
+        1, std::make_pair(source, strlen(source))
+        ));
+
     try {
-        // Get list of OpenCL platforms.
-        cl::Platform::get(&platform);
-
-        if (platform.empty()) {
-            std::cerr << "OpenCL platforms not found." << std::endl;
-        }
-
-        get_double_precision_gpu_device();
-
-        context = cl::Context(device);
-
-        // Create command queue.
-        queue = cl::CommandQueue(context, device[0]);
-
-        // Compile OpenCL program for found device.
-        program = cl::Program(context, cl::Program::Sources(
-            1, std::make_pair(source, strlen(source))
-            ));
-
-        try {
-            program.build(device);
-        } catch (const cl::Error&) {
-            std::cerr
-            << "OpenCL compilation error" << std::endl
-            << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device[0])
-            << std::endl;
-        }
-    } catch (const cl::Error &err) {
+        program.build(nvp_double_gpus);
+    } catch (const cl::Error&) {
         std::cerr
-            << "OpenCL error: "
-            << err.what() << "(" << err.err() << ")"
-            << std::endl;
+        << "OpenCL compilation error" << std::endl
+        << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(nvp_double_gpus[0])
+        << std::endl;
     }
 }
 
-void OpenCLOPS::print_gpu_device_info() {
+void OpenCLOPS::print_gpu_devices() {
+    std::vector<cl::Platform> platform;
     std::vector<cl::Device> pldev;
 
-    for(auto p = platform.begin(); device.empty() && p != platform.end(); p++) {
+    cl::Platform::get(&platform);
+    for(auto p = platform.begin(); p != platform.end(); p++) {
         p->getDevices(CL_DEVICE_TYPE_GPU, &pldev);
 
         for(auto d = pldev.begin(); d != pldev.end(); d++) {
@@ -73,36 +100,14 @@ void OpenCLOPS::print_gpu_device_info() {
     }
 }
 
-int OpenCLOPS::get_double_precision_gpu_device() {
-    std::vector<cl::Device> pldev;
+void OpenCLOPS::print_platforms() {
+    std::vector<cl::Platform> platform;
 
-    for(auto p = platform.begin(); device.empty() && p != platform.end(); p++) {
-        try {
-            p->getDevices(CL_DEVICE_TYPE_GPU, &pldev);
-
-            for(auto d = pldev.begin(); device.empty() && d != pldev.end(); d++) {
-                if (!d->getInfo<CL_DEVICE_AVAILABLE>()) continue;
-
-                std::string ext = d->getInfo<CL_DEVICE_EXTENSIONS>();
-
-                if (
-                    ext.find("cl_khr_fp64") == std::string::npos &&
-                    ext.find("cl_amd_fp64") == std::string::npos
-                ) continue;
-
-                device.push_back(*d);
-            }
-        } catch(...) {
-            device.clear();
-        }
+    cl::Platform::get(&platform);
+    for(auto p = platform.begin(); p != platform.end(); p++) {
+        std::cout << "Platform Name: " << p->getInfo<CL_PLATFORM_NAME>() << std::endl;
+        std::cout << "Platform Vendor: " << p->getInfo<CL_PLATFORM_VENDOR>() << std::endl;
     }
-
-    if (device.empty()) {
-        std::cerr << "GPUs with double precision not found." << std::endl;
-        return 1;
-    }
-
-    return 0;
 }
 
 std::vector<double> OpenCLOPS::vec_add(std::vector<double> &a, std::vector<double> &b) {
