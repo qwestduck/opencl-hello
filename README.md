@@ -20,6 +20,9 @@ For OpenCL on nvidia devices, these packages satisfy the requirements:
 * ocl-icd-opencl-dev
 * nvidia-opencl-icd
 
+Build dependencies specific to this example project:
+* cmake
+
 ## Nvidia quirks relevant to Debian 10
 The nvidia ICD does not support OpenCL 2.x. The latest version for which the ICD
 provides full support is OpenCL 1.2. Target this release with
@@ -34,6 +37,10 @@ should not be used. Instead use the vendor-agnostic ICD loader packaged as ocl-i
 ## Build
 
 ```
+# Download third-party libraries
+git submodule init
+git submodule update
+
 mkdir _build
 cd _build
 cmake .. -G 'Unix Makefiles'
