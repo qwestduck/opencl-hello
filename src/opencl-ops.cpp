@@ -6,8 +6,6 @@
 static const char source[] =
     "#if defined(cl_khr_fp64)\n"
     "#  pragma OPENCL EXTENSION cl_khr_fp64: enable\n"
-    "#elif defined(cl_amd_fp64)\n"
-    "#  pragma OPENCL EXTENSION cl_amd_fp64: enable\n"
     "#else\n"
     "#  error double precision is not supported\n"
     "#endif\n"
@@ -54,10 +52,9 @@ OpenCLOPS::OpenCLOPS() {
 
         std::string ext = d->getInfo<CL_DEVICE_EXTENSIONS>();
 
-        if (
-            ext.find("cl_khr_fp64") == std::string::npos &&
-            ext.find("cl_amd_fp64") == std::string::npos
-        ) continue;
+        if (ext.find("cl_khr_fp64") == std::string::npos) {
+            continue;
+        }
 
         nvp_double_gpus.push_back(*d);
     }
