@@ -1,4 +1,4 @@
-# Hello world in OpenCL using Nvidia hardware on Debian 10
+# OpenCL Hello world using Nvidia hardware on Debian 10
 
 ## Setup development environment in Debian 10
 To build OpenCL applications, you will need the following:
@@ -36,7 +36,7 @@ should not be used. Instead use the vendor-agnostic ICD loader packaged as ocl-i
 ```
 mkdir _build
 cd _build
-cmake .. 'Unix Makefiles'
+cmake .. -G 'Unix Makefiles'
 make
 ```
 
