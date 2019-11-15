@@ -1,5 +1,6 @@
-Hello world in OpenCL
+# Hello world in OpenCL using Nvidia hardware on Debian 10
 
+## Setup development environment in Debian 10
 To build OpenCL applications, you will need the following:
 * An OpenCL ICD Loader
 * OpenCL header files
@@ -13,16 +14,36 @@ versions of these items.
 
 The final item requires a vendor specific implementation.
 
-For OpenCL on nvidia devices on Debian 10, these packages satisfy the requirements:
+For OpenCL on nvidia devices, these packages satisfy the requirements:
 * ocl-icd-libopencl1
 * opencl-headers
 * ocl-icd-opencl-dev
 * nvidia-opencl-icd
 
-Nvidia quirks:
+## Nvidia quirks relevant to Debian 10
 The nvidia ICD does not support OpenCL 2.x. The latest version for which the ICD
 provides full support is OpenCL 1.2. Target this release with
-#define CL_TARGET_OPENCL_VERSION 120
 
-Nvidia provides its own ICD loader packaged as nvidia-libopencl1 in Debian 10. This package
+```
+#define CL_TARGET_OPENCL_VERSION 120
+```
+
+Nvidia provides its own ICD loader packaged as nvidia-libopencl1. This package
 should not be used. Instead use the vendor-agnostic ICD loader packaged as ocl-icd-libopencl1.
+
+## Build
+
+```
+mkdir _build
+cd _build
+cmake .. 'Unix Makefiles'
+make
+```
+
+## Test
+
+```
+cd _build
+make test
+```
+
