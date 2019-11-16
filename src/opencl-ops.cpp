@@ -1,9 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include "OpenCLOPS.h"
 
-static const char source[] =
+static const std::string source =
     "#if defined(cl_khr_fp64)\n"
     "#  pragma OPENCL EXTENSION cl_khr_fp64: enable\n"
     "#else\n"
@@ -69,9 +70,7 @@ OpenCLOPS::OpenCLOPS() {
     queue = cl::CommandQueue(context, nvp_double_gpus[0]);
 
     // Compile OpenCL program for found device.
-    program = cl::Program(context, cl::Program::Sources(
-        1, std::make_pair(source, strlen(source))
-        ));
+    program = cl::Program(context, cl::Program::Sources(1, source));
 
     try {
         program.build(nvp_double_gpus);
