@@ -4,24 +4,25 @@
 
 #include "OpenCLOPS.h"
 
-static const std::string source =
-    "#if defined(cl_khr_fp64)\n"
-    "#  pragma OPENCL EXTENSION cl_khr_fp64: enable\n"
-    "#else\n"
-    "#  error double precision is not supported\n"
-    "#endif\n"
-    "kernel void add(\n"
-    "       ulong n,\n"
-    "       global const double *a,\n"
-    "       global const double *b,\n"
-    "       global double *c\n"
-    "       )\n"
-    "{\n"
-    "    size_t i = get_global_id(0);\n"
-    "    if (i < n) {\n"
-    "       c[i] = a[i] + b[i];\n"
-    "    }\n"
-    "}\n";
+static const std::string source {R"CLC(
+    #if defined(cl_khr_fp64)
+    #  pragma OPENCL EXTENSION cl_khr_fp64: enable
+    #else
+    #  error double precision is not supported
+    #endif
+    kernel void add(
+           ulong n,
+           global const double *a,
+           global const double *b,
+           global double *c
+           )
+    {
+        size_t i = get_global_id(0);
+        if (i < n) {
+           c[i] = a[i] + b[i];
+        }
+    }
+)CLC"};
 
 OpenCLOPS::OpenCLOPS() {
     // Find NVidia platform
