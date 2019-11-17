@@ -31,9 +31,9 @@ OpenCLOPS::OpenCLOPS() {
     bool nvidia_platform_present = false;
 
     cl::Platform::get(&platform);
-    for(auto p = platform.begin(); p != platform.end(); p++) {
-        if(p->getInfo<CL_PLATFORM_NAME>() == "NVIDIA CUDA") {
-            nvp = cl::Platform(*p);
+    for(auto const &p : platform) {
+        if(p.getInfo<CL_PLATFORM_NAME>() == "NVIDIA CUDA") {
+            nvp = cl::Platform(p);
 
             nvidia_platform_present = true;
             break;
@@ -49,16 +49,16 @@ OpenCLOPS::OpenCLOPS() {
     std::vector<cl::Device> nvp_double_gpus;
     nvp.getDevices(CL_DEVICE_TYPE_GPU, &nvp_gpus);
 
-    for(auto d = nvp_gpus.begin(); d != nvp_gpus.end(); d++) {
-        if (!d->getInfo<CL_DEVICE_AVAILABLE>()) continue;
+    for(auto d : nvp_gpus) {
+        if (!d.getInfo<CL_DEVICE_AVAILABLE>()) continue;
 
-        std::string ext = d->getInfo<CL_DEVICE_EXTENSIONS>();
+        std::string ext = d.getInfo<CL_DEVICE_EXTENSIONS>();
 
         if (ext.find("cl_khr_fp64") == std::string::npos) {
             continue;
         }
 
-        nvp_double_gpus.push_back(*d);
+        nvp_double_gpus.push_back(d);
     }
 
     if (nvp_double_gpus.empty()) {
@@ -88,11 +88,11 @@ void OpenCLOPS::print_gpu_devices() {
     std::vector<cl::Device> pldev;
 
     cl::Platform::get(&platform);
-    for(auto p = platform.begin(); p != platform.end(); p++) {
-        p->getDevices(CL_DEVICE_TYPE_GPU, &pldev);
+    for(auto const &p : platform) {
+        p.getDevices(CL_DEVICE_TYPE_GPU, &pldev);
 
-        for(auto d = pldev.begin(); d != pldev.end(); d++) {
-            std::cout << d->getInfo<CL_DEVICE_NAME>() << std::endl;
+        for(auto const &d : pldev) {
+            std::cout << d.getInfo<CL_DEVICE_NAME>() << std::endl;
         }
     }
 }
@@ -101,9 +101,9 @@ void OpenCLOPS::print_platforms() {
     std::vector<cl::Platform> platform;
 
     cl::Platform::get(&platform);
-    for(auto p = platform.begin(); p != platform.end(); p++) {
-        std::cout << "Platform Name: " << p->getInfo<CL_PLATFORM_NAME>() << std::endl;
-        std::cout << "Platform Vendor: " << p->getInfo<CL_PLATFORM_VENDOR>() << std::endl;
+    for(auto const &p : platform) {
+        std::cout << "Platform Name: " << p.getInfo<CL_PLATFORM_NAME>() << std::endl;
+        std::cout << "Platform Vendor: " << p.getInfo<CL_PLATFORM_VENDOR>() << std::endl;
     }
 }
 
