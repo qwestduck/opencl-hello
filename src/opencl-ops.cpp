@@ -1,8 +1,8 @@
-#include <iostream>
-#include <vector>
-#include <string>
-
 #include "OpenCLOPS.h"
+
+#include <iostream>
+#include <string>
+#include <vector>
 
 static const std::string source {R"CLC(
     #if defined(cl_khr_fp64)
