@@ -49,8 +49,10 @@ OpenCLOPS::OpenCLOPS() {
     std::vector<cl::Device> nvp_double_gpus;
     nvp.getDevices(CL_DEVICE_TYPE_GPU, &nvp_gpus);
 
-    for(auto d : nvp_gpus) {
-        if (!d.getInfo<CL_DEVICE_AVAILABLE>()) continue;
+    for(auto const &d : nvp_gpus) {
+        if (!d.getInfo<CL_DEVICE_AVAILABLE>()) {
+            continue;
+        }
 
         std::string ext = d.getInfo<CL_DEVICE_EXTENSIONS>();
 
